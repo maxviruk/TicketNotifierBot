@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 STATION_FROM = os.getenv("STATION_FROM")
 STATION_TO = os.getenv("STATION_TO")
 TRAINS = os.getenv("TRAINS").split(",")  # Разбиваем на список
-DATES_RANGE = [-2, -1, 0, 1, 2, 3]  # Диапазон дат (от -2 до +3 дней)
+DATES_RANGE = [-1, 0, 1, 2, 3]  # Диапазон дат (от -2 до +3 дней)
 CLASS_ID = "К"  # Купе
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Здесь будет токен бота
