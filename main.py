@@ -128,6 +128,7 @@ schedule.every(10).minutes.do(check_tickets)
 
 if __name__ == "__main__":
     logging.info("🚀 Скрипт запущен!")
+    logging.info("🔄 Ожидание следующего запуска...")
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(60)
