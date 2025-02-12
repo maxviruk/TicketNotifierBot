@@ -1,0 +1,36 @@
+# Используем базовый образ для Python
+FROM python:3.9-slim
+
+# Устанавливаем необходимые зависимости
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    unzip \
+    gnupg2 \
+    libx11-dev \
+    libxss1 \
+    libgdk-pixbuf2.0-0 \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    libasound2 \
+    libgbm-dev \
+    libpci3 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libxrandr2 \
+    && apt-get clean
+
+# Устанавливаем Chrome
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN dpkg -i google-chrome-stable_current_amd64.deb || apt-get -y --fix-broken install
+
+# Устанавливаем нужные Python библиотеки
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Копируем остальные файлы в контейнер
+COPY . /app
+WORKDIR /app
+
+# Устанавливаем драйвер Chrome
