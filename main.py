@@ -5,17 +5,14 @@ from bs4 import BeautifulSoup
 
 # Параметры для поиска билетов
 import os
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 STATION_FROM = os.getenv("STATION_FROM")
 STATION_TO = os.getenv("STATION_TO")
 TRAINS = os.getenv("TRAINS").split(",")  # Разбиваем на список
 DATES_RANGE = [-2, -1, 0, 1, 2, 3]  # Диапазон дат (от -2 до +3 дней)
 CLASS_ID = "К"  # Купе
 
-# Данные Telegram
-TELEGRAM_BOT_TOKEN = "your_bot_token"  # Здесь будет токен бота
-TELEGRAM_CHAT_ID = "your_chat_id"  # Здесь будет ID чата
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Здесь будет токен бота
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # Здесь будет ID чата
 
 def get_ticket_info(date):
     """Получает информацию о билетах на указанную дату"""
