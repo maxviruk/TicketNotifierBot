@@ -2,6 +2,10 @@ import os
 import time
 import logging
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 import schedule
@@ -12,19 +16,12 @@ import json
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Проверяем установленные пакеты
-try:
-    result = subprocess.run(["pip", "list"], capture_output=True, text=True)
-    logging.info(f"📦 Установленные пакеты:\n{result.stdout}")
-except Exception as e:
-    logging.error(f"Ошибка при получении списка пакетов: {e}")
-
 # Загружаем переменные окружения
 STATION_FROM = os.getenv("STATION_FROM")
 STATION_TO = os.getenv("STATION_TO")
 TRAINS = os.getenv("TRAINS", "").split(",")
 START_DATE = os.getenv("START_DATE")
-CLASS_ID = os.getenv("CLASS_ID", "К")  # Добавлен параметр для выбора типа места
+CLASS_ID = os.getenv("CLASS_ID", "К")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -37,8 +34,18 @@ def check_env_vars():
         exit(1)
 
 check_env_vars()
-logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
-logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
+
+# Настройка опций для Chrome
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Безголовый режим
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Укажите путь к ChromeDriver
+chrome_service = Service("/usr/bin/chromedriver")
+
+# Инициализация веб-драйвера
+driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
