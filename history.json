@@ -1,0 +1,72 @@
+import json
+import os
+from datetime import datetime
+
+# Путь к файлу истории
+history_file = "history.json"
+
+# Функция для чтения истории из JSON
+def read_history():
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        return []
+
+# Функция для записи истории в JSON
+def write_history(history_data):
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(history_data, f, ensure_ascii=False, indent=4)
+
+# Пример использования: добавление новой записи в историю
+def log_ticket_check(found_tickets):
+    # Чтение существующей истории
+    history = read_history()
+
+    # Получаем текущее время в формате
+    check_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Записываем новую проверку
+    history.append({
+        "time": check_time,
+        "found_tickets": found_tickets
+    })
+
+    # Сохраняем обновленную историю в файл
+    write_history(history)
+
+# Пример использования в основном коде
+def check_tickets():
+    try:
+        logging.info("🔍 Проверяем билеты...")
+        found_tickets = []
+
+        start_date = datetime.strptime(START_DATE, "%Y-%m-%d")
+        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6)]
+
+        with ThreadPoolExecutor() as executor:
+            futures = {executor.submit(get_ticket_info, date): date for date in dates}
+            for future in futures:
+                tickets = future.result()
+                if tickets:
+                    found_tickets.extend(tickets)
+
+        if found_tickets:
+            message = "🚆 Найдены билеты:\n"
+            for ticket in found_tickets:
+                message += f"Поезд {ticket['train']} ({ticket['date']})\nСсылка: {ticket['link']}\n\n"
+            
+            # Разбиваем сообщение на части (Telegram ограничение 4096 символов)
+            for chunk in [message[i:i+4096] for i in range(0, len(message), 4096)]:
+                send_telegram_message(chunk)
+                time.sleep(1)
+
+            logging.info("✅ Найдены билеты! Уведомление отправлено.")
+        else:
+            logging.info("❌ Нижних мест нет.")
+
+        # Логируем текущую проверку в историю
+        log_ticket_check(found_tickets)
+
+    except Exception as e:
+        logging.error(f"Ошибка в check_tickets: {e}")
