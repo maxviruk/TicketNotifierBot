@@ -78,7 +78,7 @@ def check_tickets():
         print("❌ Нижних мест нет.")
 
 # Запуск проверки раз в 2 минуты
-schedule.every(2).minutes.do(check_tickets)
+schedule.every(10).minutes.do(check_tickets)
 
 if __name__ == "__main__":
     print("🚀 Скрипт запущен!")
