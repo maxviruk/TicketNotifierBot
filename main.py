@@ -36,7 +36,6 @@ def check_env_vars():
         exit(1)
 
 check_env_vars()
-
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
 
@@ -125,7 +124,7 @@ def check_tickets():
         logging.error(f"Ошибка в check_tickets: {e}")
 
 # Запуск проверки раз в 10 минут
-schedule.every(10).minutes.do(check_tickets)
+schedule.every(2).minutes.do(check_tickets)
 
 if __name__ == "__main__":
     logging.info("🚀 Скрипт запущен!")
