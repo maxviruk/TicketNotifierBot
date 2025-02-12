@@ -7,18 +7,13 @@ from concurrent.futures import ThreadPoolExecutor
 import schedule
 from datetime import datetime, timedelta
 import subprocess
-import json
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager  # Импортируем webdriver-manager
-from dotenv import load_dotenv
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-# Загружаем переменные окружения
-load_dotenv("env.env")
 
 # Проверяем установленные пакеты
 try:
@@ -48,20 +43,23 @@ check_env_vars()
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
 
-# Настройка Selenium для использования с безголовым Chrome
+# Указываем путь к ChromeDriver
+chrome_driver_path = "/usr/local/bin/chromedriver"  # Убедитесь, что chromedriver доступен по этому пути
+
+# Настройка опций для Chrome
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Безголовый режим
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 
-# Запускаем Chrome через Selenium
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+# Инициализация WebDriver
+driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
     url = f"https://booking.uz.gov.ua/search-trips/{STATION_FROM}/{STATION_TO}/list?startDate={date}"
     headers = {"User-Agent": "Mozilla/5.0"}
-
+    
     for attempt in range(retries):
         try:
             response = requests.get(url, headers=headers, timeout=10)
