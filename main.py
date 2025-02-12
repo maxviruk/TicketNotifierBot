@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import schedule
 from datetime import datetime, timedelta
 import subprocess
+import json
 
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -23,7 +24,7 @@ STATION_FROM = os.getenv("STATION_FROM")
 STATION_TO = os.getenv("STATION_TO")
 TRAINS = os.getenv("TRAINS", "").split(",")
 START_DATE = os.getenv("START_DATE")
-CLASS_ID = "К"
+CLASS_ID = os.getenv("CLASS_ID", "К")  # Добавлен параметр для выбора типа места
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -77,7 +78,13 @@ def parse_tickets(soup, date):
                     continue
                 
                 if available_seats > 0:
-                    tickets.append({"train": train_number, "date": date, "link": f"https://booking.uz.gov.ua{href}"})
+                    ticket_info = {
+                        "train": train_number, 
+                        "date": date, 
+                        "link": f"https://booking.uz.gov.ua{href}",
+                        "seats": available_seats
+                    }
+                    tickets.append(ticket_info)
     return tickets
 
 # Отправка сообщений в Telegram
@@ -98,7 +105,7 @@ def check_tickets():
         found_tickets = []
         
         start_date = datetime.strptime(START_DATE, "%Y-%m-%d")
-        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6)]
+        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Анализируем 5 дней
         
         with ThreadPoolExecutor() as executor:
             futures = {executor.submit(get_ticket_info, date): date for date in dates}
@@ -110,7 +117,7 @@ def check_tickets():
         if found_tickets:
             message = "🚆 Найдены билеты:\n"
             for ticket in found_tickets:
-                message += f"Поезд {ticket['train']} ({ticket['date']})\nСсылка: {ticket['link']}\n\n"
+                message += f"Поезд {ticket['train']} ({ticket['date']})\nСсылка: {ticket['link']}\nМеста: {ticket['seats']}\n\n"
             
             # Разбиваем сообщение на части (Telegram ограничение 4096 символов)
             for chunk in [message[i:i+4096] for i in range(0, len(message), 4096)]:
@@ -123,8 +130,8 @@ def check_tickets():
     except Exception as e:
         logging.error(f"Ошибка в check_tickets: {e}")
 
-# Запуск проверки раз в 10 минут
-schedule.every(2).minutes.do(check_tickets)
+# Запуск проверки каждые 5 минут
+schedule.every(5).minutes.do(check_tickets)
 
 if __name__ == "__main__":
     logging.info("🚀 Скрипт запущен!")
