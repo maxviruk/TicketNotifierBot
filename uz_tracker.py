@@ -4,10 +4,13 @@ import schedule
 from bs4 import BeautifulSoup
 
 # Параметры для поиска билетов
-STATION_FROM = "2204001"  # Киев
-STATION_TO = "2200300"    # Львов
+import os
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+STATION_FROM = os.getenv("STATION_FROM")
+STATION_TO = os.getenv("STATION_TO")
+TRAINS = os.getenv("TRAINS").split(",")  # Разбиваем на список
 DATES_RANGE = [-2, -1, 0, 1, 2, 3]  # Диапазон дат (от -2 до +3 дней)
-TRAINS = ["029К", "091К"]  # Указать номера поездов (пример)
 CLASS_ID = "К"  # Купе
 
 # Данные Telegram
