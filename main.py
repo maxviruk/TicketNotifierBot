@@ -5,15 +5,19 @@ import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 import schedule
+from dotenv import load_dotenv
 
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Загружаем переменные из .env файла
+load_dotenv()
 
 # Параметры для поиска билетов
 STATION_FROM = os.getenv("STATION_FROM")
 STATION_TO = os.getenv("STATION_TO")
 TRAINS = os.getenv("TRAINS").split(",")  # Разбиваем на список
-DATES_RANGE = [-1, 0, 1, 2, 3]  # Диапазон дат (от -2 до +3 дней)
+START_DATE = os.getenv("START_DATE")  # Дата, с которой начинаем поиск
 CLASS_ID = "К"  # Купе
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Здесь будет токен бота
@@ -21,7 +25,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # Здесь будет ID ч�
 
 def check_env_vars():
     """Проверка наличия необходимых переменных окружения"""
-    required_vars = ["STATION_FROM", "STATION_TO", "TRAINS", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
+    required_vars = ["STATION_FROM", "STATION_TO", "TRAINS", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "START_DATE"]
     missing_vars = [var for var in required_vars if os.getenv(var) is None]
 
     if missing_vars:
@@ -81,10 +85,13 @@ def check_tickets():
     logging.info("🔍 Проверяем билеты...")
     found_tickets = []
 
+    start_date_obj = time.strptime(START_DATE, "%Y-%m-%d")  # Преобразуем START_DATE в объект времени
+    start_timestamp = time.mktime(start_date_obj)  # Преобразуем в timestamp
+
     with ThreadPoolExecutor() as executor:
         futures = []
-        for offset in DATES_RANGE:
-            date = (time.time() + offset * 86400)
+        for offset in range(6):  # Мы будем искать билеты на 6 дней
+            date = start_timestamp + offset * 86400  # Генерируем дату с учетом начала
             formatted_date = time.strftime("%Y-%m-%d", time.gmtime(date))
             futures.append(executor.submit(get_ticket_info, formatted_date))
 
