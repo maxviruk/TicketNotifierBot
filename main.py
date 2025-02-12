@@ -8,6 +8,19 @@ import schedule
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+
+import subprocess
+
+def log_installed_packages():
+    try:
+        result = subprocess.run(["pip", "list"], capture_output=True, text=True)
+        logging.info(f"📦 Установленные пакеты:\n{result.stdout}")
+    except Exception as e:
+        logging.error(f"Ошибка при получении списка пакетов: {e}")
+
+log_installed_packages()
+
+
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
