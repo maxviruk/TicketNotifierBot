@@ -10,6 +10,7 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из файла .env
@@ -46,9 +47,6 @@ check_env_vars()
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
 
-# Указываем путь к ChromeDriver
-chrome_driver_path = "/usr/local/bin/chromedriver"  # Используем локально установленный ChromeDriver
-
 # Настройка опций для Chrome
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Безголовый режим
@@ -56,8 +54,8 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-# Инициализация WebDriver
-driver = webdriver.Chrome(service=Service("/usr/local/bin/chromedriver"), options=chrome_options)
+# Инициализация WebDriver с использованием webdriver-manager
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
