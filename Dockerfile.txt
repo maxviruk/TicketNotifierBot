@@ -1,4 +1,6 @@
-# Устанавливаем необходимые зависимости для Chrome
+FROM python:3.12-slim
+
+# Устанавливаем необходимые зависимости для Chrome и ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -19,19 +21,27 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     fonts-liberation \
-    libappindicator3-1 \
-    libgdk-pixbuf2.0-0
+    && rm -rf /var/lib/apt/lists/*
 
-# Скачать и распаковать ChromeDriver актуальной версии
-RUN LATEST_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget https://chromedriver.storage.googleapis.com/${LATEST_VERSION}/chromedriver_linux64.zip && \
+# Устанавливаем Google Chrome
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -fy && \
+    rm google-chrome-stable_current_amd64.deb
+
+# Устанавливаем ChromeDriver
+RUN wget -q https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
     mv chromedriver /usr/local/bin/ && \
-    chmod +x /usr/local/bin/chromedriver
+    chmod +x /usr/local/bin/chromedriver && \
+    rm chromedriver_linux64.zip
 
-# Установка Google Chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -fy
+# Устанавливаем зависимости Python
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Добавляем chromedriver в PATH
-ENV PATH="/usr/local/bin:${PATH}"
+# Копируем код приложения
+COPY . .
+
+# Запускаем приложение
+CMD ["python", "main.py"]
