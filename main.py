@@ -43,17 +43,14 @@ check_env_vars()
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
 
-# Указываем путь к ChromeDriver
-chrome_driver_path = "/usr/local/bin/chromedriver"  # Убедитесь, что chromedriver доступен по этому пути
-
 # Настройка опций для Chrome
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Безголовый режим
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 
-# Инициализация WebDriver
-driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
+# Инициализация WebDriver через webdriver-manager
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
@@ -99,9 +96,9 @@ def parse_tickets(soup, date):
                 if available_seats > 0:
                     ticket_info = {
                         "train": train_number, 
-                        "train_name": train_name,  # Добавляем имя поезда
+                        "train_name": train_name,
                         "date": date, 
-                        "coupe_info": coupe_info,  # Добавляем информацию о купе
+                        "coupe_info": coupe_info,
                         "link": f"https://booking.uz.gov.ua{href}",
                         "seats": available_seats
                     }
@@ -126,7 +123,7 @@ def check_tickets():
         found_tickets = []
         
         start_date = datetime.strptime(START_DATE, "%Y-%m-%d")
-        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Анализируем 5 дней
+        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
         
         with ThreadPoolExecutor() as executor:
             futures = {executor.submit(get_ticket_info, date): date for date in dates}
@@ -140,7 +137,6 @@ def check_tickets():
             for ticket in found_tickets:
                 message += f"Поезд {ticket['train']} ({ticket['train_name']})\nКупе: {ticket['coupe_info']}\nСсылка: {ticket['link']}\nМеста: {ticket['seats']}\n\n"
             
-            # Разбиваем сообщение на части (Telegram ограничение 4096 символов)
             for chunk in [message[i:i+4096] for i in range(0, len(message), 4096)]:
                 send_telegram_message(chunk)
                 time.sleep(1)
