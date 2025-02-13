@@ -10,7 +10,6 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из файла .env
@@ -54,8 +53,8 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-# Инициализация WebDriver с использованием webdriver-manager
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+# Инициализация WebDriver с использованием установленного ChromeDriver
+driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
