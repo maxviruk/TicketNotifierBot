@@ -10,7 +10,6 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -18,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 # Проверяем установленные пакеты
 try:
     result = subprocess.run(["pip", "list"], capture_output=True, text=True)
-    logging.info(f"📦 Установленные пакеты:\n{result.stdout}")
+    logging.info(f"\U0001F4E6 Установленные пакеты:\n{result.stdout}")
 except Exception as e:
     logging.error(f"Ошибка при получении списка пакетов: {e}")
 
@@ -43,14 +42,18 @@ check_env_vars()
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
 
+# Указываем путь к ChromeDriver
+chrome_driver_path = "/usr/local/bin/chromedriver"  # Используем локально установленный ChromeDriver
+
 # Настройка опций для Chrome
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Безголовый режим
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
-# Инициализация WebDriver через webdriver-manager
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+# Инициализация WebDriver
+driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
@@ -96,9 +99,9 @@ def parse_tickets(soup, date):
                 if available_seats > 0:
                     ticket_info = {
                         "train": train_number, 
-                        "train_name": train_name,
+                        "train_name": train_name,  # Добавляем имя поезда
                         "date": date, 
-                        "coupe_info": coupe_info,
+                        "coupe_info": coupe_info,  # Добавляем информацию о купе
                         "link": f"https://booking.uz.gov.ua{href}",
                         "seats": available_seats
                     }
@@ -123,7 +126,7 @@ def check_tickets():
         found_tickets = []
         
         start_date = datetime.strptime(START_DATE, "%Y-%m-%d")
-        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
+        dates = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Анализируем 5 дней
         
         with ThreadPoolExecutor() as executor:
             futures = {executor.submit(get_ticket_info, date): date for date in dates}
@@ -140,7 +143,6 @@ def check_tickets():
             for chunk in [message[i:i+4096] for i in range(0, len(message), 4096)]:
                 send_telegram_message(chunk)
                 time.sleep(1)
-
             logging.info("✅ Найдены билеты! Уведомление отправлено.")
         else:
             logging.info("❌ Нижних мест нет.")
