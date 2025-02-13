@@ -10,6 +10,10 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения из файла .env
+load_dotenv("env.env")
 
 # Настроим логгер
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
