@@ -2,14 +2,12 @@ FROM python:3.12
 
 WORKDIR /app
 
-COPY requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Устанавливаем необходимые зависимости для Chrome и ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     curl \
+    gnupg \
     libxss1 \
     libappindicator3-1 \
     libasound2 \
@@ -27,13 +25,8 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     fonts-liberation \
-    && rm -rf /var/lib/apt/lists/*
-
-
-
-# Установка зависимостей
-RUN apt-get update && apt-get install -y \
-    wget unzip curl \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Установка Google Chrome
@@ -50,12 +43,11 @@ RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_
     chmod +x /usr/local/bin/chromedriver
 
 # Установка зависимостей Python
-WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Установка Railway CLI
-RUN npm i -g @railway/cli
+RUN npm install -g @railway/cli
 
 COPY . .
 
