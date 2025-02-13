@@ -42,7 +42,7 @@ RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_
     rm /tmp/chromedriver.zip && \
     chmod +x /usr/local/bin/chromedriver
 
-RUN chmod +x /usr/local/bin/chromedriver
+# Проверка наличия ChromeDriver
 RUN ls -l /usr/local/bin/chromedriver
 
 # Установка зависимостей Python
