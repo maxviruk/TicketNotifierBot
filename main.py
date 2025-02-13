@@ -53,7 +53,7 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
 # Инициализация WebDriver
-driver = webdriver.Chrome(service=Service(chrome_driver_path), options=chrome_options)
+driver = webdriver.Chrome(service=Service("/usr/local/bin/chromedriver"), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
