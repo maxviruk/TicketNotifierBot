@@ -35,6 +35,17 @@ CLASS_ID = os.getenv("CLASS_ID", "К")  # Добавлен параметр дл
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+
+# Настройка опций для Chrome
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Безголовый режим
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Инициализация WebDriver с использованием установленного ChromeDriver
+driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'), options=chrome_options)
+
 # Проверка наличия переменных окружения
 def check_env_vars():
     required_vars = ["STATION_FROM", "STATION_TO", "TRAINS", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "START_DATE"]
@@ -46,16 +57,6 @@ def check_env_vars():
 check_env_vars()
 logging.info(f"🔍 STATION_FROM: {STATION_FROM}, STATION_TO: {STATION_TO}, TRAINS: {TRAINS}, START_DATE: {START_DATE}")
 logging.info(f"🔍 TELEGRAM_BOT_TOKEN: {bool(TELEGRAM_BOT_TOKEN)}, TELEGRAM_CHAT_ID: {bool(TELEGRAM_CHAT_ID)}")
-
-# Настройка опций для Chrome
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Безголовый режим
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-
-# Инициализация WebDriver с использованием webdriver-manager
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
