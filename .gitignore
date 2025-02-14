@@ -1,1 +1,28 @@
-env.env
+# Игнорируем файлы с переменными окружения
+.env
+*.env
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.swp
+.history.json
+
+# Файлы зависимостей (если не нужны в репозитории)
+venv/
+*.egg-info/
+
+# Docker
+.dockerignore
+
+# Heroku
+Procfile
+
+# Jupyter Notebook (если вдруг используешь)
+.ipynb_checkpoints/
