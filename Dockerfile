@@ -1,9 +1,10 @@
 # Используем официальный образ Python 3.12
 FROM python:3.12
 
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем необходимые зависимости для Chrome и ChromeDriver
+# Устанавливаем зависимости для Chrome и ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -33,14 +34,14 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Установка Google Chrome
+# Устанавливаем Google Chrome
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg \
     && echo 'deb [signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Установка ChromeDriver
+# Устанавливаем ChromeDriver
 RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
     wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" && \
     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
@@ -54,14 +55,15 @@ RUN ls -l /usr/local/bin/chromedriver
 COPY requirements.txt .  # Копируем только requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Клонируем репозиторий
-RUN git clone https://github.com/maxviruk/TicketNotifierBot.git /app
-
-# Установка Railway CLI
+# Устанавливаем Railway CLI
 RUN npm install -g @railway/cli
 
-# Копируем оставшиеся файлы проекта
-COPY . .  # Здесь копируем все остальные файлы проекта, кроме уже скопированных
+# Клонируем репозиторий (если это необходимо)
+# Вы можете использовать COPY вместо git clone, если репозиторий уже клонирован в проект
+# RUN git clone https://github.com/maxviruk/TicketNotifierBot.git /app
+
+# Копируем оставшиеся файлы проекта (используйте .dockerignore для исключения ненужных файлов)
+COPY . .  # Здесь копируем все остальные файлы проекта
 
 # Запуск Python приложения
 CMD ["python", "main.py"]
