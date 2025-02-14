@@ -1,3 +1,4 @@
+# Используем официальный образ Python 3.12
 FROM python:3.12
 
 WORKDIR /app
@@ -25,15 +26,19 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     fonts-liberation \
-    nodejs \
-    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем Node.js через официальный репозиторий
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Установка Google Chrome
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg \
     && echo 'deb [signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
 
 # Установка ChromeDriver
 RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
@@ -46,7 +51,7 @@ RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_
 RUN ls -l /usr/local/bin/chromedriver
 
 # Установка зависимостей Python
-COPY requirements.txt .
+COPY requirements.txt .  # Копируем только requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Клонируем репозиторий
@@ -55,6 +60,8 @@ RUN git clone https://github.com/maxviruk/TicketNotifierBot.git /app
 # Установка Railway CLI
 RUN npm install -g @railway/cli
 
-COPY . .
+# Копируем оставшиеся файлы проекта
+COPY . .  # Здесь копируем все остальные файлы проекта, кроме уже скопированных
 
+# Запуск Python приложения
 CMD ["python", "main.py"]
