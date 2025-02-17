@@ -35,28 +35,18 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg \
+RUN wget --timeout=30 -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg \
     && echo 'deb [signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable \
+    && apt-get install -y google-chrome-stable=114.0.5735.198-1 \
     && CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //') \
     && CHROME_MAJOR_VERSION=${CHROME_VERSION%%.*} \
-    && CHROME_DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}" || echo "LATEST_RELEASE") \
-    && wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" \
+    && CHROME_DRIVER_VERSION=$(wget --timeout=30 -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}" || echo "LATEST_RELEASE") \
+    && wget --timeout=30 -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
     && rm /tmp/chromedriver.zip \
     && chmod +x /usr/local/bin/chromedriver \
     && rm -rf /var/lib/apt/lists/*
-
-# Устанавливаем ChromeDriver
-RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" && \
-    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
-    rm /tmp/chromedriver.zip && \
-    chmod +x /usr/local/bin/chromedriver
-
-# Проверка наличия ChromeDriver
-RUN ls -l /usr/local/bin/chromedriver
 
 # Проверка версии Chrome и ChromeDriver
 RUN echo "Chrome version: $(google-chrome --version)" && echo "ChromeDriver version: $(/usr/local/bin/chromedriver --version)"
@@ -73,7 +63,3 @@ COPY . .
 
 # Запуск Python приложения
 CMD ["python", "main.py"]
-
-
-
-
