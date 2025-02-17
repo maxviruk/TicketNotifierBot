@@ -68,11 +68,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Устанавливаем Railway CLI
 RUN npm install -g @railway/cli
 
-# Клонируем репозиторий (если это необходимо)
-# Вы можете использовать COPY вместо git clone, если репозиторий уже клонирован в проект
-# RUN git clone https://github.com/maxviruk/TicketNotifierBot.git /app
 # Копируем оставшиеся файлы проекта (используйте .dockerignore для исключения ненужных файлов)
-COPY . .  # Здесь копируем все остальные файлы проекта
+COPY . .
 
 # Запуск Python приложения
 CMD ["python", "main.py"]
+
+
+
+
