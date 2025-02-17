@@ -61,9 +61,8 @@ RUN ls -l /usr/local/bin/chromedriver
 # Проверка версии Chrome и ChromeDriver
 RUN echo "Chrome version: $(google-chrome --version)" && echo "ChromeDriver version: $(/usr/local/bin/chromedriver --version)"
 
-
 # Установка зависимостей Python
-COPY requirements.txt .  # Копируем только requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Устанавливаем Railway CLI
