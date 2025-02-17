@@ -54,12 +54,16 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
 # Инициализация WebDriver с использованием установленного ChromeDriver
-driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'), options=chrome_options)
+try:
+    driver = webdriver.Chrome(service=Service('/usr/local/bin/chromedriver'), options=chrome_options)
+except Exception as e:
+    logging.error(f"Ошибка инициализации WebDriver: {e}")
+    exit(1)
 
 # Получение информации о билетах
 def get_ticket_info(date, retries=3):
     url = f"https://booking.uz.gov.ua/search-trips/{STATION_FROM}/{STATION_TO}/list?startDate={date}"
-    headers = {"User -Agent": "Mozilla/5.0"}
+    headers = {"User-Agent": "Mozilla/5.0"}
     
     for attempt in range(retries):
         try:
