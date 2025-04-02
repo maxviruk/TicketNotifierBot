@@ -63,3 +63,6 @@ COPY . .
 
 # Запуск Python приложения
 CMD ["python", "main.py"]
+
+
+
